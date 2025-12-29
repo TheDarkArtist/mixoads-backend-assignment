@@ -104,19 +104,19 @@ This tight coupling increases cognitive load, makes testing difficult, and raise
 
 For each issue above, explain your fix in detail.
 
-### Fix 1: [Issue Name]
+### Fix 1: Authentication security
 
 **My approach:**
-[What did you do to fix it?]
+Removed hardcoded API credentials from source code and loaded them from environment variables. Eliminated logging of authorization headers and access tokens, and added fail-fast validation when required configuration is missing.
 
 **Why this approach:**
-[Why did you choose this solution over alternatives?]
+Credential exposure is the highest-severity issue in the system. Fixing it first reduces immediate security risk without altering request flow or business logic.
 
 **Trade-offs:**
-[What compromises did you make? What would you do differently with more time?]
+The authentication mechanism itself (Basic auth → Bearer token) remains unchanged to match API requirements. Token refresh logic is intentionally deferred.
 
 **Code changes:**
-[Link to commits, files, or specific line numbers]
+`src/syncCampaigns.ts`
 
 ---
 
