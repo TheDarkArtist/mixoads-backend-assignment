@@ -168,6 +168,22 @@ A single timeout value was chosen for simplicity. With more time, different requ
 
 ---
 
+### Fix 5: Database correctness and idempotency
+
+**My approach:**
+Reworked the database layer to use a single shared connection pool and parameterized SQL queries. Added idempotent write behavior using `ON CONFLICT` to ensure repeated syncs are safe.
+
+**Why this approach:**
+Database writes must be safe under retries and re-runs. Idempotent upserts prevent duplicate data and allow partial failures to be retried without manual cleanup. Parameterized queries eliminate SQL injection risk.
+
+**Trade-offs:**
+This solution assumes a uniqueness constraint on `campaigns.id`. Schema migrations and transactional batching were intentionally avoided to keep the fix focused and minimal.
+
+**Code changes:**
+`src/database.ts`
+
+---
+
 ## Part 3: Code Structure Improvements
 
 Explain how you reorganized/refactored the code.
