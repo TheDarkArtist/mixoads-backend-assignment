@@ -120,23 +120,19 @@ The authentication mechanism itself (Basic auth → Bearer token) remains unchan
 
 ---
 
-### Fix 2: [Issue Name]
+### Fix 2: Pagination correctness
 
 **My approach:**
-
+Replaced the single-page campaign fetch with an explicit pagination loop that continues requesting pages until the API indicates no more data via `has_more`.
 
 **Why this approach:**
-
+This is the minimal change required to ensure correctness and prevent silent data loss. It preserves the existing request pattern and avoids introducing concurrency or rate-limit complexity prematurely.
 
 **Trade-offs:**
-
+Pagination is handled sequentially for simplicity. Performance optimizations and rate-limit-aware batching are intentionally deferred.
 
 **Code changes:**
-
-
----
-
-[Continue for all fixes]
+`src/syncCampaigns.ts`
 
 ---
 

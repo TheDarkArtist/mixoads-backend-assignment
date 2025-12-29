@@ -74,26 +74,39 @@ export async function syncAllCampaigns() {
 
   console.log('\nStep 2: Fetching campaigns...');
 
-  const campaignsResponse = await fetch(`${API_BASE_URL}/api/campaigns?page=1&limit=${PAGE_SIZE}`, {
-    headers: {
-      'Authorization': `Bearer ${accessToken}`
-    }
-  });
+  let allCampaigns: Campaign[] = [];
+  let page = 1;
+  let hasMore = true;
 
-  if (!campaignsResponse.ok) {
-    throw new Error(`API returned ${campaignsResponse.status}: ${campaignsResponse.statusText}`);
+  while (hasMore) {
+    const response = await fetch(
+      `${API_BASE_URL}/api/campaigns?page=${page}&limit=${PAGE_SIZE}`,
+        {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch campaigns (page ${page}): ${response.status}`);
+    }
+
+    const data: any = await response.json();
+
+    allCampaigns.push(...data.data);
+    hasMore = data.pagination.has_more;
+    page++;
   }
 
-  const campaignsData: any = await campaignsResponse.json();
+  console.log(`Fetched ${allCampaigns.length} campaigns in total`);
 
-  console.log(`Found ${campaignsData.data.length} campaigns`);
-  console.log(`Pagination: page ${campaignsData.pagination.page}, has_more: ${campaignsData.pagination.has_more}`);
 
   console.log('\nStep 3: Syncing campaigns to database...');
 
   let successCount = 0;
 
-  for (const campaign of campaignsData.data) {
+  for (const campaign of allCampaigns) {
     console.log(`\n   Syncing: ${campaign.name} (ID: ${campaign.id})`);
 
     try {
@@ -123,6 +136,8 @@ export async function syncAllCampaigns() {
   }
 
   console.log('\n' + '='.repeat(60));
-  console.log(`Sync complete: ${successCount}/${campaignsData.data.length} campaigns synced`);
+  console.log(
+    `Sync complete: ${successCount}/${allCampaigns.length} campaigns synced`
+  );
   console.log('='.repeat(60));
 }
